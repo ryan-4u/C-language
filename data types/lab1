@@ -1,0 +1,10 @@
+ #include <stdio.h>
+int main()
+{
+    float x=7.0;
+    float y =3.5;
+    float z;
+    
+    printf("z=%f\n",z=x/y);
+    return 0;
+}
