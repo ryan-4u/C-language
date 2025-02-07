@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <conio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -116,6 +117,7 @@ void add_expense() {
 
     expenses[expense_count++] = new_expense;
     printf("Expense added successfully!\n");
+    wait_for_user();  // Pause and wait for the user
 }
 
 void view_expenses() {
@@ -158,6 +160,7 @@ void add_category() {
     strcpy(categories[category_count++], new_category);
     printf("Category '%s' added successfully!\n", new_category);
 
+    wait_for_user();  // Pause and wait for the user
 }
 
 void about_us() {
@@ -173,6 +176,7 @@ void clear_screen() {
     #else
         system("clear");
     #endif
+    wait_for_user();  // Pause and wait for the user
 }
 
 void get_current_date(char *date) {
@@ -182,6 +186,15 @@ void get_current_date(char *date) {
 }
 
 void wait_for_user() {
-    printf("\nPress Enter to return to the main menu...");
-    getchar();  // Wait for Enter
+    printf("\nPress 'X' to exit or 'M' to return to the main menu: ");
+    char ch = _getch();  // Use _getch to capture key input without Enter
+    if (ch == 'm' || ch == 'M') {
+        printf("\nReturning to the main menu...\n");
+    } else if (ch == 'x' || ch == 'X') {
+        printf("\nExiting the program. Goodbye!\n");
+        exit(0);
+    } else {
+        printf("\nInvalid key. Please press 'M' or 'X'.\n");
+        wait_for_user();
+    }
 }
