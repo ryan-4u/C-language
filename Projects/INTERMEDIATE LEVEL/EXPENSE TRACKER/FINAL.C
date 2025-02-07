@@ -3,9 +3,9 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_EXPENSES 100
-#define MAX_CATEGORIES 20
-#define MAX_DESC_LENGTH 100
+#define MAX_EXPENSES 1000000
+#define MAX_CATEGORIES 25
+#define MAX_DESC_LENGTH 200
 #define MAX_CATEGORY_LENGTH 30
 
 typedef struct {
@@ -158,7 +158,7 @@ void add_category() {
 
 void about_us() {
     printf("Expense Tracker v1.0\n");
-    printf("Developed by Aaryan\n");
+    printf("Developed by Aaryan and The team \n");
 }
 
 void clear_screen() {
