@@ -29,6 +29,7 @@ void add_category();
 void about_us();
 void clear_screen();
 void get_current_date(char *date);
+void wait_for_user();
 
 int main() {
     int choice;
@@ -127,11 +128,13 @@ void view_expenses() {
     for (int i = 0; i < expense_count; i++) {
         printf("%s - %s - %s - $%.2f\n", expenses[i].date, expenses[i].category, expenses[i].description, expenses[i].amount);
     }
+    wait_for_user();  // Pause and wait for the user
 }
 
 void generate_reports() {
     // Implement daily, monthly, and yearly report logic here
     printf("Report generation feature is not implemented yet.\n");
+    wait_for_user();  // Pause and wait for the user
 }
 
 void add_category() {
@@ -154,11 +157,13 @@ void add_category() {
 
     strcpy(categories[category_count++], new_category);
     printf("Category '%s' added successfully!\n", new_category);
+
 }
 
 void about_us() {
     printf("Expense Tracker v1.0\n");
     printf("Developed by Aaryan and The team \n");
+    wait_for_user();  // Pause and wait for the user
 }
 
 void clear_screen() {
@@ -174,4 +179,9 @@ void get_current_date(char *date) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     sprintf(date, "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+}
+
+void wait_for_user() {
+    printf("\nPress Enter to return to the main menu...");
+    getchar();  // Wait for Enter
 }
