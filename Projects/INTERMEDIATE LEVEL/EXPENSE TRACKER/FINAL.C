@@ -18,7 +18,7 @@ typedef struct {
 
 Expense expenses[MAX_EXPENSES];
 int expense_count = 0;
-char categories[MAX_CATEGORIES][MAX_CATEGORY_LENGTH] = {"Food", "Transport", "Entertainment", "Miscellaneous"};
+char categories[MAX_CATEGORIES][MAX_CATEGORY_LENGTH] = {"Food", "Travel", "Fun","Study", "Miscellaneous"};
 int category_count = 4;
 int need_clear_screen = 0;
 
@@ -99,7 +99,7 @@ void add_expense() {
     }
 
     Expense new_expense;
-    printf("Enter category (default categories: Food, Transport, Entertainment, Miscellaneous): ");
+    printf("Enter category (default categories: Food, Travel, Fun,Study, Miscellaneous): ");
     fgets(new_expense.category, MAX_CATEGORY_LENGTH, stdin);
     new_expense.category[strcspn(new_expense.category, "\n")] = 0; // Remove newline
 
