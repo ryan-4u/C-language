@@ -165,7 +165,8 @@ void add_category() {
 
 void about_us() {
     printf("Expense Tracker v1.0\n");
-    printf("Developed by Aaryan and The team \n");
+    printf("This is a program\n developed to store your daily expenses. \nSolving the problem of writing your expenses");
+    printf("\n\nDeveloped by Aaryan and The team \n");
     wait_for_user();  // Pause and wait for the user
 }
 
