@@ -103,9 +103,13 @@ void add_expense() {
     fgets(new_expense.category, MAX_CATEGORY_LENGTH, stdin);
     new_expense.category[strcspn(new_expense.category, "\n")] = 0; // Remove newline
 
-    printf("Enter date (YYYY-MM-DD): ");
-    fgets(new_expense.date, 11, stdin);
-    new_expense.date[strcspn(new_expense.date, "\n")] = 0; // Remove newline
+    int day, month, year;
+    printf("Enter date (dd-mm-yyyy): ");
+    scanf("%2d-%2d-%4d", &day, &month, &year);
+    getchar();  // Consume newline character
+
+        // Store date as yyyy-mm-dd for easier sorting internally
+    sprintf(new_expense.date, "%04d-%02d-%02d", year, month, day);
 
     printf("Enter description: ");
     fgets(new_expense.description, MAX_DESC_LENGTH, stdin);
@@ -128,7 +132,9 @@ void view_expenses() {
 
     printf("\nExpenses:\n");
     for (int i = 0; i < expense_count; i++) {
-        printf("%s - %s - %s - $%.2f\n", expenses[i].date, expenses[i].category, expenses[i].description, expenses[i].amount);
+        int day, month, year;
+        sscanf(expenses[i].date, "%4d-%2d-%2d", &year, &month, &day);  // Extract date components
+        printf("%02d-%02d-%04d - %s - %s - Rs.%.2f\n", day, month, year, expenses[i].category, expenses[i].description, expenses[i].amount);
     }
     wait_for_user();  // Pause and wait for the user
 }
@@ -183,8 +189,9 @@ void clear_screen() {
 void get_current_date(char *date) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    sprintf(date, "%04d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    sprintf(date, "%02d-%02d-%04d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
 }
+
 
 void wait_for_user() {
     printf("\nPress 'X' to exit or 'M' to return to the main menu: ");
