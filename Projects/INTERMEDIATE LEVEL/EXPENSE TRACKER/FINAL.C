@@ -170,9 +170,22 @@ void add_category() {
 }
 
 void about_us() {
-    printf("Expense Tracker v1.0\n");
-    printf("This is a program\n developed to store your daily expenses. \nSolving the problem of writing your expenses");
-    printf("\n\nDeveloped by Aaryan and The team \n");
+
+    printf("=======================================\n");
+    printf("        Expense Tracker v1.0           \n");
+    printf("=======================================\n");
+    printf("Hello! Welcome to Expense Tracker.\n");
+    printf("This application helps you efficiently record and manage your daily expenses.\n");
+    printf("\nKey Features:\n");
+    printf("1. Add and categorize your expenses easily.\n");
+    printf("2. View and generate reports of your expenses.\n");
+    printf("3. Customizable categories to suit your lifestyle.\n");
+    printf("\nOur Mission:\n");
+    printf("To provide a simple and effective solution for tracking expenses and managing your finances.\n");
+    printf("\nDeveloped by Aaryan and the Team\n");
+    printf("For feedback or suggestions, please contact us at aaryanofficial64@gmail.com \n");
+    printf("=======================================\n");
+    
     wait_for_user();  // Pause and wait for the user
 }
 
@@ -183,7 +196,6 @@ void clear_screen() {
     #else
         system("clear");
     #endif
-    wait_for_user();  // Pause and wait for the user
 }
 
 void get_current_date(char *date) {
@@ -194,15 +206,24 @@ void get_current_date(char *date) {
 
 
 void wait_for_user() {
-    printf("\nPress 'X' to exit or 'M' to return to the main menu: ");
-    char ch = _getch();  // Use _getch to capture key input without Enter
-    if (ch == 'm' || ch == 'M') {
-        printf("\nReturning to the main menu...\n");
-    } else if (ch == 'x' || ch == 'X') {
-        printf("\nExiting the program. Goodbye!\n");
-        exit(0);
-    } else {
-        printf("\nInvalid key. Please press 'M' or 'X'.\n");
-        wait_for_user();
-    }
+    char ch;
+    do {
+        printf("\nSelect an option: \n");
+        printf("M - Menu | E - Exit | C - Clear Screen\n");
+        ch = _getch();  // Use _getch to capture key input without Enter
+
+        if (ch == 'm' || ch == 'M') {
+            printf("\nReturning to the main menu...\n");
+            return; // Return to the menu
+        } else if (ch == 'e' || ch == 'E') {
+            printf("\nExiting the program. Goodbye!\n");
+            exit(0); // Exit the program
+        } else if (ch == 'c' || ch == 'C') {
+            clear_screen();
+            printf("\nScreen cleared successfully!\n");
+        } else {
+            printf("\nInvalid key. Please press 'M', 'E', or 'C'.\n");
+        }
+    } while (1); // Keep looping until a valid option is selected
 }
+
