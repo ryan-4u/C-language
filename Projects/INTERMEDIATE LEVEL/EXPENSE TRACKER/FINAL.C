@@ -26,7 +26,10 @@ void display_menu();
 void add_expense();
 void view_expenses();
 void generate_reports();
+void category_management();
 void add_category();
+void delete_category();
+void list_categories() ;
 void about_us();
 void clear_screen();
 void get_current_date(char *date);
@@ -37,7 +40,7 @@ int main() {
 
     while (1) {
         display_menu();
-        printf("Select an option: ");
+        printf("\nSelect an option: ");
         scanf("%d", &choice);
         getchar(); // Consume newline character
 
@@ -52,7 +55,7 @@ int main() {
                 generate_reports();
                 break;
             case 4:
-                add_category();
+                category_management();
                 break;
             case 5:
                 about_us();
@@ -85,7 +88,7 @@ void display_menu() {
     printf("1. Add Expense\n");
     printf("2. View Expense\n");
     printf("3. Generate Reports\n");
-    printf("4. Add New Expense Categories\n");
+    printf("4. Categories Manager\n");
     printf("5. About Us\n");
     printf("6. Clear Screen\n");
     printf("7. Exit\n");
@@ -99,16 +102,39 @@ void add_expense() {
     }
 
     Expense new_expense;
-    printf("Enter category (default categories: Food, Travel, Fun,Study, Miscellaneous): ");
+
+    for (int i = 0; i < category_count; i++) {
+        printf("%-15s", categories[i]); // Print category with fixed width for alignment
+        if ((i + 1) % 4 == 0) {
+            printf("\n"); // Move to the next row after every 4 categories
+        }
+    }
+
+
+    printf("Enter category (or type a new one): ");
     fgets(new_expense.category, MAX_CATEGORY_LENGTH, stdin);
     new_expense.category[strcspn(new_expense.category, "\n")] = 0; // Remove newline
+
+    // Check if category is new and add it to the list
+    int category_exists = 0;
+    for (int i = 0; i < category_count; i++) {
+        if (strcmp(categories[i], new_expense.category) == 0) {
+            category_exists = 1;
+            break;
+        }
+    }
+
+    if (!category_exists && category_count < MAX_CATEGORIES) {
+        strcpy(categories[category_count++], new_expense.category);
+        printf("New category '%s' added successfully!\n", new_expense.category);
+    }
 
     int day, month, year;
     printf("Enter date (dd-mm-yyyy): ");
     scanf("%2d-%2d-%4d", &day, &month, &year);
     getchar();  // Consume newline character
 
-        // Store date as yyyy-mm-dd for easier sorting internally
+    // Store date as yyyy-mm-dd for easier sorting internally
     sprintf(new_expense.date, "%04d-%02d-%02d", year, month, day);
 
     printf("Enter description: ");
@@ -123,6 +149,7 @@ void add_expense() {
     printf("Expense added successfully!\n");
     wait_for_user();  // Pause and wait for the user
 }
+
 
 void view_expenses() {
     if (expense_count == 0) {
@@ -143,6 +170,38 @@ void generate_reports() {
     // Implement daily, monthly, and yearly report logic here
     printf("Report generation feature is not implemented yet.\n");
     wait_for_user();  // Pause and wait for the user
+}
+
+void category_management() {
+    int choice;
+
+    do {
+        printf("\nCategory Management:\n");
+        printf("1. Add Category\n");
+        printf("2. Delete Category\n");
+        printf("3. List Categories\n");
+        printf("4. Return to Main Menu\n");
+        printf("Select an option: ");
+        scanf("%d", &choice);
+        getchar(); // Consume newline character
+
+        switch (choice) {
+            case 1:
+                add_category();
+                break;
+            case 2:
+                delete_category();
+                break;
+            case 3:
+                list_categories();
+                break;
+            case 4:
+                printf("Returning to the main menu...\n");
+                return;
+            default:
+                printf("Invalid option. Please try again.\n");
+        }
+    } while (1);
 }
 
 void add_category() {
@@ -167,6 +226,52 @@ void add_category() {
     printf("Category '%s' added successfully!\n", new_category);
 
     wait_for_user();  // Pause and wait for the user
+}
+
+void delete_category() {
+    if (category_count == 0) {
+        printf("No categories available to delete.\n");
+        return;
+    }
+
+    printf("Available categories:\n");
+    for (int i = 0; i < category_count; i++) {
+        printf("%d. %s\n", i + 1, categories[i]);
+    }
+
+    int delete_index;
+    printf("Enter the number of the category to delete: ");
+    scanf("%d", &delete_index);
+    getchar(); // Consume newline character
+
+    if (delete_index < 1 || delete_index > category_count) {
+        printf("Invalid category number.\n");
+        return;
+    }
+
+    // Shift categories up to fill the gap
+    for (int i = delete_index - 1; i < category_count - 1; i++) {
+        strcpy(categories[i], categories[i + 1]);
+    }
+    category_count--;
+    printf("Category deleted successfully.\n");
+}
+
+void list_categories() {
+    printf("\n");
+    if (category_count == 0) {
+        printf("No categories available.\n");
+        return;
+    }
+
+    printf("Available categories:\n");
+    for (int i = 0; i < category_count; i++) {
+        printf("%-15s", categories[i]); // Print category with fixed width for alignment
+        if ((i + 1) % 4 == 0) {
+            printf("\n"); // Move to the next row after every 4 categories
+        }
+    }
+    printf("\nNew categories can also be added during the 'Add Expense' process.\n");
 }
 
 void about_us() {
