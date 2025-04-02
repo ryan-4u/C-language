@@ -4,23 +4,23 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_EXPENSES 1000000
+typedef struct Expense {
+    char category[20];
+    char description[50];
+    float amount;
+    char date[11]; // Format: YYYY-MM-DD
+    struct Expense* next; // Pointer to next node
+} Expense;
+
+Expense* head = NULL; // Head pointer for the linked list
+
+#define MAX_EXPENSES 100000
 #define MAX_CATEGORIES 25
 #define MAX_DESC_LENGTH 200
 #define MAX_CATEGORY_LENGTH 30
 
-typedef struct {
-    char category[MAX_CATEGORY_LENGTH];
-    char date[11]; // YYYY-MM-DD
-    char description[MAX_DESC_LENGTH];
-    float amount;
-} Expense;
-
-Expense expenses[MAX_EXPENSES];
-int expense_count = 0;
-char categories[MAX_CATEGORIES][MAX_CATEGORY_LENGTH] = {"Food", "Travel", "Fun","Study", "Miscellaneous"};
-int category_count = 4;
-int need_clear_screen = 0;
+const char *categories[] = {"Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"};
+const int categories_count = sizeof(categories) / sizeof(categories[0]);
 
 void display_menu();
 void add_expense();
@@ -34,6 +34,7 @@ void about_us();
 void clear_screen();
 void get_current_date(char *date);
 void wait_for_user();
+void free_memory();
 
 int main() {
     int choice;
@@ -64,15 +65,24 @@ int main() {
                 clear_screen();
                 break;    
             case 7:
-                printf("Exiting the program.\n");
-                exit(0);
+                free_memory();
+                return 0;
             default:
                 printf("Invalid option. Please try again.\n");
         }
     }
-
     return 0;
 }
+
+    void free_memory() {
+        Expense* temp;
+        while (head != NULL) {
+            temp = head;
+            head = head->next;
+            free(temp);
+        }
+        printf("Memory freed. Exiting...\n");
+    }    
 
 void display_menu() {
     if (need_clear_screen) {
@@ -96,81 +106,95 @@ void display_menu() {
 }
 
 void add_expense() {
-    if (expense_count >= MAX_EXPENSES) {
-        printf("Expense limit reached. Cannot add more expenses.\n");
+    // Step 1: Allocate memory for a new expense node
+    Expense *new_expense = (Expense *)malloc(sizeof(Expense));
+    if (new_expense == NULL) {
+        printf("Memory allocation failed!\n");
         return;
     }
+    
+    printf("Select a category:\n");
+for (int i = 0; i < categories_count; i++) {
+    printf("%d. %s\n", i + 1, categories[i]);
+}
 
-    Expense new_expense;
+int category_choice;
+printf("Enter category number: ");
+scanf("%d", &category_choice);
 
-    for (int i = 0; i < category_count; i++) {
-        printf("%-15s", categories[i]); // Print category with fixed width for alignment
-        if ((i + 1) % 4 == 0) {
-            printf("\n"); // Move to the next row after every 4 categories
-        }
-    }
+// Validate category choice
+if (category_choice < 1 || category_choice > categories_count) {
+    printf("Invalid category selection. Please try again.\n");
+    return;
+}
 
+// Copy the selected category into the new expense node
+strcpy(new_expense->category, categories[category_choice - 1]);
 
-    printf("Enter category (or type a new one): ");
-    fgets(new_expense.category, MAX_CATEGORY_LENGTH, stdin);
-    new_expense.category[strcspn(new_expense.category, "\n")] = 0; // Remove newline
-
-    // Check if category is new and add it to the list
-    int category_exists = 0;
-    for (int i = 0; i < category_count; i++) {
-        if (strcmp(categories[i], new_expense.category) == 0) {
-            category_exists = 1;
-            break;
-        }
-    }
-
-    if (!category_exists && category_count < MAX_CATEGORIES) {
-        strcpy(categories[category_count++], new_expense.category);
-        printf("New category '%s' added successfully!\n", new_expense.category);
-    }
-
-    int day, month, year;
-    printf("Enter date (dd-mm-yyyy): ");
-    scanf("%2d-%2d-%4d", &day, &month, &year);
-    getchar();  // Consume newline character
-
-    // Store date as yyyy-mm-dd for easier sorting internally
-    sprintf(new_expense.date, "%04d-%02d-%02d", year, month, day);
-
+    // Step 2: Take user input and store it in the new node
+    printf("Enter category: ");
+    scanf("%s", new_expense->category);
+    printf("Enter date (YYYY-MM-DD): ");
+    scanf("%s", new_expense->date);
     printf("Enter description: ");
-    fgets(new_expense.description, MAX_DESC_LENGTH, stdin);
-    new_expense.description[strcspn(new_expense.description, "\n")] = 0; // Remove newline
-
+    scanf(" %[^\n]", new_expense->description);
     printf("Enter amount: ");
-    scanf("%f", &new_expense.amount);
-    getchar(); // Consume newline character
+    scanf("%f", &new_expense->amount);
 
-    expenses[expense_count++] = new_expense;
-    printf("Expense added successfully!\n");
-    wait_for_user();  // Pause and wait for the user
+    // Step 3: Insert the new node at the beginning of the linked list
+    new_expense->next = head;
+    head = new_expense;
+
+    printf("\nExpense added successfully!\n");
+
+    // Ensure compatibility with your existing structure
+    wait_for_user();  // Keeping this so it does not affect existing functionality
 }
 
 
+
 void view_expenses() {
-    if (expense_count == 0) {
-        printf("No expenses recorded.\n");
+    if (head == NULL) {
+        printf("No expenses recorded yet!\n");
         return;
     }
 
-    printf("\nExpenses:\n");
-    for (int i = 0; i < expense_count; i++) {
-        int day, month, year;
-        sscanf(expenses[i].date, "%4d-%2d-%2d", &year, &month, &day);  // Extract date components
-        printf("%02d-%02d-%04d - %s - %s - Rs.%.2f\n", day, month, year, expenses[i].category, expenses[i].description, expenses[i].amount);
+    Expense* temp = head;
+    printf("\nExpense List:\n");
+
+    while (temp != NULL) {
+        printf("%s - %s: ₹%.2f on %s\n", 
+               temp->category, temp->description, 
+               temp->amount, temp->date);
+        temp = temp->next;
     }
+
     wait_for_user();  // Pause and wait for the user
 }
 
 void generate_reports() {
-    // Implement daily, monthly, and yearly report logic here
-    printf("Report generation feature is not implemented yet.\n");
-    wait_for_user();  // Pause and wait for the user
+    if (head == NULL) {
+        printf("\nNo expenses recorded yet!\n");
+        wait_for_user();
+        return;
+    }
+
+    Expense *current = head;
+    printf("\n---- Expense Report ----\n");
+    
+    while (current != NULL) {
+        printf("\nCategory: %s", current->category);
+        printf("\nDate: %s", current->date);
+        printf("\nDescription: %s", current->description);
+        printf("\nAmount: %.2f\n", current->amount);
+        printf("-----------------------\n");
+        
+        current = current->next;  // Move to the next expense
+    }
+
+    wait_for_user();  // Keeps functionality consistent
 }
+
 
 void category_management() {
     int choice;
