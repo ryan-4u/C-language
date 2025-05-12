@@ -26,10 +26,62 @@ void clearScreen() {
     system("clear || cls");
 }
 
+void freeExpenses() {
+    Expense* temp;
+    while (expenseHead) {
+        temp = expenseHead;
+        expenseHead = expenseHead->next;
+        free(temp);
+    }
+}
+
+void freeCategories() {
+    Category* temp;
+    while (categoryHead) {
+        temp = categoryHead;
+        categoryHead = categoryHead->next;
+        free(temp);
+    }
+}
+
+int isValidDate(const char* date) {
+    int y, m, d;
+    if (sscanf(date, "%d-%d-%d", &y, &m, &d) != 3) return 0;
+
+    // Check for logical date ranges
+    if (y < 1900 || m < 1 || m > 12 || d < 1 || d > 31) return 0;
+
+    // Handle months with different days
+    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (m == 2) { // Leap year check
+        daysInMonth[1] = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 29 : 28;
+    }
+    if (d > daysInMonth[m - 1]) return 0;
+
+    // Check if the date is in the future
+    time_t t = time(NULL);
+    struct tm *current = localtime(&t);
+    int currYear = current->tm_year + 1900;
+    int currMonth = current->tm_mon + 1;
+    int currDay = current->tm_mday;
+
+    if (y > currYear || (y == currYear && m > currMonth) || 
+        (y == currYear && m == currMonth && d > currDay)) {
+        return 0; // Future date not allowed
+    }
+
+    return 1; // Valid date
+}
+
+
 void addCategory() {
     Category* newCategory = (Category*)malloc(sizeof(Category));
+    if (!newCategory) return;
+
     printf("Enter category name: ");
-    scanf("%s", newCategory->name);
+    fgets(newCategory->name, MAX_CAT, stdin);
+    newCategory->name[strcspn(newCategory->name, "\n")] = '\0';
+    
     newCategory->next = categoryHead;
     categoryHead = newCategory;
     printf("Category added successfully!\n");
@@ -38,7 +90,8 @@ void addCategory() {
 void removeCategory() {
     char name[MAX_CAT];
     printf("Enter category name to remove: ");
-    scanf("%s", name);
+    fgets(name, sizeof(name), stdin);  // ✅ Safe input handling
+    name[strcspn(name, "\n")] = '\0';  // ✅ Remove newline character
     
     Category* current = categoryHead;
     Category* previous = NULL;
@@ -77,6 +130,7 @@ void viewCategories() {
 
 void addExpense() {
     Expense* newExpense = (Expense*)malloc(sizeof(Expense));
+    if (!newExpense) return;
 
     getchar(); // Clear any leftover newline before taking input
 
@@ -93,9 +147,11 @@ void addExpense() {
 
     while (getchar() != '\n'); // ✅ Ensure buffer is cleared after amount input
 
-    printf("Enter date (YYYY-MM-DD): ");
-    fgets(newExpense->date, sizeof(newExpense->date), stdin);
-    newExpense->date[strcspn(newExpense->date, "\n")] = '\0'; // Remove newline
+    do {
+        printf("Enter date (YYYY-MM-DD): ");
+        fgets(newExpense->date, sizeof(newExpense->date), stdin);
+        newExpense->date[strcspn(newExpense->date, "\n")] = '\0';
+    } while (!isValidDate(newExpense->date));
 
     while (getchar() != '\n');
 
@@ -204,7 +260,9 @@ void generateReport() {
 }
 
 void displayMenu() {
-    printf("\nExpense Tracker Menu:\n");
+     printf("\n========================================\n");
+    printf("        Expense Tracker Menu            \n");
+    printf("========================================\n");
     printf("1. Add Category (a)\n");
     printf("2. Remove Category (r)\n");
     printf("3. View Categories (v)\n");
@@ -213,6 +271,8 @@ void displayMenu() {
     printf("6. Generate Report (g)\n");
     printf("7. Clear Screen (c)\n");
     printf("8. Exit (m)\n");
+    printf("========================================\n");
+
 }
 
 int main() {
@@ -245,13 +305,25 @@ int main() {
             case 'c':
                 clearScreen();
                 break;
-            case 'm':
-                printf("Exiting the program.\n");
-                exit(0);
+            case 'm': {
+                char confirm;
+                printf("Are you sure you want to exit? (y/n): ");
+                scanf(" %c", &confirm);
+                if (confirm == 'y' || confirm == 'Y') {
+                    freeExpenses();
+                    freeCategories();
+                    printf("Exiting program. Goodbye!\n");
+                    return 0;
+                }
+                break;
+            }
             default:
                 printf("Invalid option! Please try again.\n");
         }
     }
 
+    // Before exiting, free memory
+    freeExpenses();
+    freeCategories();
     return 0;
 }
